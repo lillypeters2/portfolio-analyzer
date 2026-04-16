@@ -24,9 +24,16 @@ if st.button("Analyze", type="primary"):
         st.error("Please fill in all ticker symbols and weights!")
     else:
         weights = [float(w) for w in weights_raw]
+        if any(w > 1 for w in weights):
+            st.error("Please enter weights as decimals, not percentages! For example, use 0.6 instead of 60.")
+        st.stop()
+        if round(sum(weights), 2) != 1.0:
+            st.error("Weights must add up to 1.0!")
+            st.stop()
 
+    
         for ticker in tickers:
-            data = yf.Ticker(ticker).history(period="1d")
+            data = yf.Ticker(ticker.upper()).history(period="1d")
             if data.empty:
                 st.error(f"{ticker} doesn't look right — check the ticker symbol!")
                 st.stop()
@@ -69,16 +76,16 @@ if st.button("Analyze", type="primary"):
             st.error(f"Uh oh, the S&P 500 beat you by {abs(portfolio.alpha):.2f}%! Better luck next time!")
 
         if portfolio.sharpe < 1:
-            st.error(f"That's not great, your return came with a lot of risk, Sharpe: {portfolio.sharpe:.2f}")
+            st.error(f"That's not great, your return came with a lot of risk, as Sharpe was calculated to be {portfolio.sharpe:.2f}")
         elif portfolio.sharpe < 2:
-            st.success(f"That's pretty good, moderate risk, Sharpe: {portfolio.sharpe:.2f}")
+            st.success(f"That's pretty good, your return came with moderate risk, as Sharpe was calculated to be {portfolio.sharpe:.2f}")
         else:
-            st.success(f"Great job! Minimal risk, Sharpe: {portfolio.sharpe:.2f}!")
+            st.success(f"Great job! Your return came with minimal risk, as Sharpe was calculated to be {portfolio.sharpe:.2f}!")
 
         if portfolio.weighted_beta < 1:
-            st.success(f"Your picks were less risky than the market, Beta: {portfolio.weighted_beta:.2f}")
+            st.success(f"Overall, pretty good! Your picks were less risky than the market as Beta was calculated to be {portfolio.weighted_beta:.2f}")
         else:
-            st.error(f"Your picks were more risky than the market, Beta: {portfolio.weighted_beta:.2f}")
+            st.error(f"Overall, could be better, your picks were more risky than the market as Beta was calculated to be {portfolio.weighted_beta:.2f}")
 
         # Chart
         sp_normalized = (portfolio.sp_data["Close"] / portfolio.sp_data["Close"].iloc[0]) * 100
