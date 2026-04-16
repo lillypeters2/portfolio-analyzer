@@ -26,7 +26,7 @@ if st.button("Analyze", type="primary"):
         weights = [float(w) for w in weights_raw]
         if any(w > 1 for w in weights):
             st.error("Please enter weights as decimals, not percentages! For example, use 0.6 instead of 60.")
-        st.stop()
+            st.stop()
         if round(sum(weights), 2) != 1.0:
             st.error("Weights must add up to 1.0!")
             st.stop()
